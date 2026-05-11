@@ -4,7 +4,7 @@
 
 - **Project Title:** TPL-CCP (Compiler Construction Project)
 - **Course Context:** Compiler Design / Programming Languages
-- **Repository:** `github.com/hafsaimtiaz0915/TPL-CCP`
+- **Repository:** `https://github.com/hafsaimtiaz0915/TPL-CCP`
 - **Report Version:** Updated after latest code integration
 - **Date:** 2026-05-11
 
@@ -130,7 +130,7 @@ The implementation follows a staged architecture:
 
 ### 8.2 Current Integration Note (Important)
 
-The latest source includes references to enhanced modules (`ast_enhanced.*`, `semantic_analysis.*`) from `main.c`. The current `Makefile` object list does not include all newly required compilation units. As a result, default Linux build currently fails at link stage with unresolved symbol(s) unless build inputs are updated.
+The latest source includes references to enhanced modules (`ast_enhanced.*`, `semantic_analysis.*`) from `main.c`. The current `Makefile` object list does not include all newly required compilation units. As a result, default Linux build currently fails at link stage with unresolved symbol(s). This is a **known issue pending resolution**; remediation is to update the `Makefile` source/object lists and linker inputs to include the required modules.
 
 This report reflects the updated code state and its module additions.
 
