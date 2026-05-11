@@ -221,6 +221,11 @@ make test
 ### Current Known Build Status
 The current `Makefile` does not include all modules referenced by `main.c` (`ast_enhanced` and `semantic_analysis` linkage path), which causes linker failure (`undefined reference to printTACEnhanced`) in Linux build flow. This is a known integration issue pending remediation.
 
+### Temporary Workaround and Resolution Plan
+- **Temporary workaround:** compile with explicit module inclusion, e.g.:
+  - `gcc -std=c99 -Wall -Wextra -g -o compiler lex.yy.c c_parser.tab.c symbol_table.c codegen.c tac_executor.c token_logger.c ast_enhanced.c semantic_analysis.c main.c -lm`
+- **Resolution target:** update `Makefile` source/object lists in the next project maintenance milestone so `make` works without manual compiler arguments.
+
 ---
 
 ## 8. Assumptions and Trade-offs Deliverable
@@ -337,4 +342,3 @@ Multiple `test_*.c` files for branch and control-flow experimentation are availa
 - `/home/runner/work/TPL-CCP/TPL-CCP/main.c`
 - `/home/runner/work/TPL-CCP/TPL-CCP/Makefile`
 - `/home/runner/work/TPL-CCP/TPL-CCP/README.md`
-
