@@ -4,7 +4,7 @@
 
 - **Project Title:** TPL-CCP (Compiler Construction Project)
 - **Course Context:** Compiler Design / Programming Languages
-- **Repository:** `hafsaimtiaz0915/TPL-CCP`
+- **Repository:** `github.com/hafsaimtiaz0915/TPL-CCP`
 - **Report Version:** Updated after latest code integration
 - **Date:** 2026-05-11
 
@@ -191,4 +191,3 @@ TPL-CCP demonstrates a complete educational compiler pipeline with modular archi
 - `semantic_analysis.c`, `semantic_analysis.h`
 - `ast_enhanced.c`, `ast_enhanced.h`
 - Test files: `test_*.c`
-
