@@ -1,0 +1,37 @@
+Token Analysis Output
+=====================
+
+Token Type      Token Value                         Line      
+────────────────────────────────────────────────────────────────
+KEYWORD         int                                 1         
+IDENTIFIER      main                                1         
+PUNCTUATION     (                                   1         
+PUNCTUATION     )                                   1         
+PUNCTUATION     {                                   1         
+KEYWORD         int                                 1         
+IDENTIFIER      x                                   1         
+OPERATOR        =                                   1         
+NUMBER          5                                   1         
+PUNCTUATION     ;                                   1         
+KEYWORD         if                                  1         
+PUNCTUATION     (                                   1         
+IDENTIFIER      x                                   1         
+OPERATOR        >                                   1         
+NUMBER          0                                   1         
+PUNCTUATION     )                                   1         
+IDENTIFIER      x                                   1         
+OPERATOR        =                                   1         
+NUMBER          10                                  1         
+PUNCTUATION     ;                                   1         
+KEYWORD         else                                1         
+IDENTIFIER      x                                   1         
+OPERATOR        =                                   1         
+OPERATOR        -                                   1         
+NUMBER          10                                  1         
+PUNCTUATION     ;                                   1         
+KEYWORD         return                              1         
+NUMBER          0                                   1         
+PUNCTUATION     ;                                   1         
+PUNCTUATION     }                                   1         
+
+Total Tokens: 30

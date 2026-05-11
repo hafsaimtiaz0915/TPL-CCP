@@ -103,19 +103,14 @@ void enter_scope(SymbolTable *st) {
     }
 }
 
-/* Exit current scope (remove symbols and decrease nesting) */
+/* Exit current scope (keep symbols for reporting, just decrease nesting) */
 void exit_scope(SymbolTable *st) {
     if (st == NULL || st->scope_level == 0) {
         return;
     }
     
-    /* Remove symbols from current scope */
-    int i = st->count - 1;
-    while (i >= 0 && st->symbols[i].scope_level == st->scope_level) {
-        st->count--;
-        i--;
-    }
-    
+    /* Don't remove symbols - keep them for symbol table reporting */
+    /* Just decrement scope level */
     st->scope_level--;
 }
 
@@ -137,7 +132,7 @@ void print_symbol_table(SymbolTable *st) {
                sym->initialized ? "Yes" : "No");
         
         if (sym->is_function) {
-            printf("  └─ Function with %d parameter(s)\n", sym->param_count);
+            printf("  --> Function with %d parameter(s)\n", sym->param_count);
         }
         if (sym->is_array) {
             printf("  └─ Array[%d]\n", sym->array_size);

@@ -5,100 +5,117 @@
 #include <stdlib.h>
 #include "symbol_table.h"
 
-/* IR Opcodes for Stack-Based VM */
+/* TAC (Three Address Code) - Complete replacement for stack IR */
 typedef enum {
-    /* Stack operations */
-    PUSH_CONST,      /* Push constant value */
-    PUSH_VAR,        /* Push variable value */
-    POP_VAR,         /* Pop and store in variable */
+    /* Arithmetic */
+    TAC_ADD,        /* a := b + c */
+    TAC_SUB,        /* a := b - c */
+    TAC_MUL,        /* a := b * c */
+    TAC_DIV,        /* a := b / c */
+    TAC_MOD,        /* a := b % c */
     
-    /* Arithmetic operations */
-    OP_ADD,          /* Addition */
-    OP_SUB,          /* Subtraction */
-    OP_MUL,          /* Multiplication */
-    OP_DIV,          /* Division */
-    OP_MOD,          /* Modulo */
-    OP_NEG,          /* Negation (unary minus) */
+    /* Unary */
+    TAC_NEG,        /* a := -b */
+    TAC_NOT,        /* a := !b */
     
-    /* Bitwise operations */
-    OP_AND,          /* Bitwise AND */
-    OP_OR,           /* Bitwise OR */
-    OP_XOR,          /* Bitwise XOR */
-    OP_NOT,          /* Bitwise NOT */
-    OP_SHL,          /* Shift left */
-    OP_SHR,          /* Shift right */
+    /* Assignment */
+    TAC_ASSIGN,     /* a := b */
+    TAC_ASSIGN_CONST, /* a := constant */
     
-    /* Logical operations */
-    OP_LOGIC_AND,    /* Logical AND */
-    OP_LOGIC_OR,     /* Logical OR */
-    OP_LOGIC_NOT,    /* Logical NOT */
+    /* Comparison */
+    TAC_EQ,         /* a := (b == c) */
+    TAC_NE,         /* a := (b != c) */
+    TAC_LT,         /* a := (b < c) */
+    TAC_LE,         /* a := (b <= c) */
+    TAC_GT,         /* a := (b > c) */
+    TAC_GE,         /* a := (b >= c) */
     
-    /* Comparison operations */
-    OP_CMP_EQ,       /* Equal */
-    OP_CMP_NE,       /* Not equal */
-    OP_CMP_LT,       /* Less than */
-    OP_CMP_LE,       /* Less than or equal */
-    OP_CMP_GT,       /* Greater than */
-    OP_CMP_GE,       /* Greater than or equal */
+    /* Logical */
+    TAC_AND,        /* a := b && c */
+    TAC_OR,         /* a := b || c */
     
-    /* Control flow */
-    OP_JMP,          /* Unconditional jump */
-    OP_JMP_FALSE,    /* Jump if false */
-    OP_LABEL,        /* Label (no operation) */
+    /* Array */
+    TAC_ARRAY_LOAD, /* a := b[c] */
+    TAC_ARRAY_STORE,/* a[b] := c */
     
-    /* Functions */
-    OP_CALL,         /* Function call */
-    OP_RET,          /* Return from function */
+    /* Jump & Control Flow */
+    TAC_LABEL,      /* label: */
+    TAC_GOTO,       /* goto label */
+    TAC_IF_FALSE,   /* if (!cond) goto label */
+    TAC_IF_TRUE,    /* if (cond) goto label */
+    TAC_IFGOTO,     /* if (a) goto label (deprecated, use IF_TRUE) */
+    TAC_IFNOT_GOTO, /* if (!a) goto label (deprecated, use IF_FALSE) */
     
-    /* Memory operations */
-    OP_LOAD_ARRAY,   /* Load array element */
-    OP_STORE_ARRAY,  /* Store array element */
+    /* Function */
+    TAC_PARAM,      /* param a */
+    TAC_CALL,       /* a := call func */
+    TAC_RETURN,     /* return a */
+    TAC_FUNC_START, /* function_start func */
+    TAC_FUNC_END,   /* function_end func */
     
-    /* Misc */
-    OP_NOP,          /* No operation */
-    OP_HALT,         /* Program halt */
-    
-    OP_INC,          /* Increment */
-    OP_DEC,          /* Decrement */
-} IROpcode;
+    /* Control */
+    TAC_NOP,
+    TAC_HALT,
+} TACOpcode;
 
-/* IR Instruction */
+/* TAC Instruction */
 typedef struct {
-    IROpcode opcode;
-    int arg;         /* Argument (value, symbol_id, label, etc.) */
-    int line_num;    /* Source line for debugging */
-} IRInstruction;
+    TACOpcode op;
+    char result[256];       /* Result variable (a := ...) */
+    char arg1[256];         /* First argument */
+    char arg2[256];         /* Second argument */
+    int arg1_is_const;      /* Is arg1 a constant? */
+    int arg2_is_const;      /* Is arg2 a constant? */
+    int const_val1;         /* Constant value if arg1_is_const */
+    int const_val2;         /* Constant value if arg2_is_const */
+    int line_num;           /* Source line for debugging */
+} TACInstruction;
 
-/* Code generator state */
+/* Code generator */
 typedef struct {
-    IRInstruction *instructions;
-    int instr_count;
-    int instr_capacity;
-    int label_counter;
+    TACInstruction *code;
+    int code_size;
+    int code_capacity;
+    int temp_counter;       /* For generating temporary variables */
+    int label_counter;      /* For generating unique labels */
     SymbolTable *sym_table;
+    /* Label mapping for VM execution */
+    char **label_names;     /* Array of label names */
+    int *label_indices;     /* Array of instruction indices for each label */
+    int label_map_count;    /* Number of labels */
+    int label_map_capacity; /* Capacity of label mapping arrays */
 } CodeGenerator;
 
 /* Function declarations */
-
-/* Code generator management */
 CodeGenerator* create_code_generator(SymbolTable *st);
 void destroy_code_generator(CodeGenerator *cg);
 
-/* IR generation */
-void emit_instruction(CodeGenerator *cg, IROpcode opcode, int arg, int line);
-void emit_push_const(CodeGenerator *cg, int value, int line);
-void emit_push_var(CodeGenerator *cg, const char *var_name, int line);
-void emit_pop_var(CodeGenerator *cg, const char *var_name, int line);
-void emit_arithmetic(CodeGenerator *cg, IROpcode op, int line);
-void emit_comparison(CodeGenerator *cg, IROpcode op, int line);
-void emit_label(CodeGenerator *cg, int label_id, int line);
-void emit_jump(CodeGenerator *cg, int label_id, int line);
-void emit_jump_false(CodeGenerator *cg, int label_id, int line);
+/* TAC generation */
+void emit_tac(CodeGenerator *cg, TACOpcode op, 
+              const char *result, const char *arg1, const char *arg2, 
+              int arg1_is_const, int arg2_is_const, int line);
+void emit_tac_const(CodeGenerator *cg, TACOpcode op,
+                    const char *result, const char *arg1, int const_val,
+                    int line);
+void emit_tac_binary(CodeGenerator *cg, TACOpcode op, const char *result,
+                     const char *left, const char *right, int line);
+void emit_tac_unary(CodeGenerator *cg, TACOpcode op, const char *result,
+                    const char *operand, int line);
+void emit_tac_label(CodeGenerator *cg, int label_id, int line);
+void emit_tac_goto(CodeGenerator *cg, int label_id, int line);
+void emit_tac_ifgoto(CodeGenerator *cg, const char *cond, int label_id, int line);
+void emit_tac_ifnot_goto(CodeGenerator *cg, const char *cond, int label_id, int line);
+
+/* Emit if-false and if-true conditional jumps */
+void emit_tac_if_false(CodeGenerator *cg, const char *cond, int label_id, int line);
+void emit_tac_if_true(CodeGenerator *cg, const char *cond, int label_id, int line);
+
+char* get_temp_var(CodeGenerator *cg);
 int create_label(CodeGenerator *cg);
 
-/* IR output */
-void print_ir(CodeGenerator *cg);
-void save_ir(CodeGenerator *cg, const char *filename);
-const char* opcode_name(IROpcode opcode);
+/* Output */
+void print_tac(CodeGenerator *cg);
+void save_tac(CodeGenerator *cg, const char *filename);
+const char* tac_opcode_name(TACOpcode op);
 
 #endif // CODEGEN_H

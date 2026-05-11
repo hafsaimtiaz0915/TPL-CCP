@@ -1,0 +1,2798 @@
+Terminals unused in grammar
+
+   DO
+   SWITCH
+   CASE
+   DEFAULT
+   '&'
+   '|'
+   '^'
+   '~'
+   INC_OP
+   DEC_OP
+   AUTO
+   CONST
+   DOUBLE
+   ENUM
+   EXTERN
+   GOTO
+   LONG
+   REGISTER
+   SHORT
+   SIGNED
+   SIZEOF
+   STATIC
+   STRUCT
+   TYPEDEF
+   UNION
+   UNSIGNED
+   VOLATILE
+   STRING_LITERAL
+   LEFT_OP
+   RIGHT_OP
+   MUL_ASSIGN
+   DIV_ASSIGN
+   MOD_ASSIGN
+   ADD_ASSIGN
+   SUB_ASSIGN
+   LEFT_ASSIGN
+   RIGHT_ASSIGN
+   AND_ASSIGN
+   XOR_ASSIGN
+   OR_ASSIGN
+   PTR_OP
+
+
+Rules useless in parser due to conflicts
+
+   39 $@7: /* empty */
+
+
+State 27 conflicts: 13 shift/reduce
+State 28 conflicts: 13 shift/reduce
+State 49 conflicts: 13 shift/reduce
+State 51 conflicts: 13 shift/reduce
+State 52 conflicts: 13 shift/reduce
+State 53 conflicts: 13 shift/reduce
+State 54 conflicts: 13 shift/reduce
+State 55 conflicts: 13 shift/reduce
+State 56 conflicts: 13 shift/reduce
+State 57 conflicts: 13 shift/reduce
+State 58 conflicts: 13 shift/reduce
+State 59 conflicts: 13 shift/reduce
+State 60 conflicts: 13 shift/reduce
+State 61 conflicts: 13 shift/reduce
+State 62 conflicts: 13 shift/reduce
+State 63 conflicts: 13 shift/reduce
+State 106 conflicts: 16 reduce/reduce
+State 139 conflicts: 16 reduce/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: /* empty */
+    2        | program declaration
+
+    3 declaration: var_declaration
+    4            | function_declaration
+
+    5 var_declaration: type_specifier IDENTIFIER ';'
+    6                | type_specifier IDENTIFIER '=' expression ';'
+    7                | type_specifier IDENTIFIER '[' NUMBER ']' ';'
+
+    8 type_specifier: INT
+    9               | FLOAT
+   10               | CHAR
+   11               | VOID
+
+   12 parameter_list: type_specifier IDENTIFIER
+   13               | parameter_list ',' type_specifier IDENTIFIER
+
+   14 $@1: /* empty */
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' '{' $@1 statement_list '}'
+
+   16 $@2: /* empty */
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' '{' $@2 statement_list '}'
+
+   18 statement_list: /* empty */
+   19               | statement_list statement
+
+   20 statement: matched_statement
+   21          | unmatched_statement
+
+   22 matched_statement: expression ';'
+   23                  | var_declaration
+
+   24 $@3: /* empty */
+
+   25 matched_statement: '{' $@3 statement_list '}'
+   26                  | if_matched
+   27                  | while_statement
+   28                  | for_statement
+   29                  | BREAK ';'
+   30                  | CONTINUE ';'
+   31                  | RETURN ';'
+   32                  | RETURN expression ';'
+
+   33 unmatched_statement: if_unmatched
+
+   34 $@4: /* empty */
+
+   35 $@5: /* empty */
+
+   36 if_matched: IF '(' expression ')' $@4 matched_statement ELSE $@5 matched_statement
+
+   37 $@6: /* empty */
+
+   38 if_unmatched: IF '(' expression ')' $@6 statement
+
+   39 $@7: /* empty */
+
+   40 $@8: /* empty */
+
+   41 if_unmatched: IF '(' expression ')' $@7 matched_statement ELSE $@8 unmatched_statement
+
+   42 $@9: /* empty */
+
+   43 $@10: /* empty */
+
+   44 while_statement: WHILE '(' $@9 expression ')' $@10 statement
+
+   45 $@11: /* empty */
+
+   46 $@12: /* empty */
+
+   47 $@13: /* empty */
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 expression ')' $@13 statement
+
+   49 expression: IDENTIFIER
+   50           | NUMBER
+   51           | expression '+' expression
+   52           | expression '-' expression
+   53           | expression '*' expression
+   54           | expression '/' expression
+   55           | expression '%' expression
+   56           | expression EQ_OP expression
+   57           | expression NE_OP expression
+   58           | expression '<' expression
+   59           | expression '>' expression
+   60           | expression LE_OP expression
+   61           | expression GE_OP expression
+   62           | expression AND_OP expression
+   63           | expression OR_OP expression
+   64           | '-' expression
+   65           | '!' expression
+   66           | '(' expression ')'
+   67           | IDENTIFIER '=' expression
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'!' (33) 65
+'%' (37) 55
+'&' (38)
+'(' (40) 15 17 36 38 41 44 48 66
+')' (41) 15 17 36 38 41 44 48 66
+'*' (42) 53
+'+' (43) 51
+',' (44) 13
+'-' (45) 52 64
+'/' (47) 54
+';' (59) 5 6 7 22 29 30 31 32 48
+'<' (60) 58
+'=' (61) 6 67
+'>' (62) 59
+'[' (91) 7
+']' (93) 7
+'^' (94)
+'{' (123) 15 17 25
+'|' (124)
+'}' (125) 15 17 25
+'~' (126)
+error (256)
+INT (258) 8
+FLOAT (259) 9
+CHAR (260) 10
+VOID (261) 11
+IF (262) 36 38 41
+ELSE (263) 36 41
+WHILE (264) 44
+FOR (265) 48
+DO (266)
+SWITCH (267)
+CASE (268)
+DEFAULT (269)
+BREAK (270) 29
+CONTINUE (271) 30
+RETURN (272) 31 32
+IDENTIFIER (273) 5 6 7 12 13 15 17 49 67
+NUMBER (274) 7 50
+INC_OP (275)
+DEC_OP (276)
+LE_OP (277) 60
+GE_OP (278) 61
+EQ_OP (279) 56
+NE_OP (280) 57
+AND_OP (281) 62
+OR_OP (282) 63
+AUTO (283)
+CONST (284)
+DOUBLE (285)
+ENUM (286)
+EXTERN (287)
+GOTO (288)
+LONG (289)
+REGISTER (290)
+SHORT (291)
+SIGNED (292)
+SIZEOF (293)
+STATIC (294)
+STRUCT (295)
+TYPEDEF (296)
+UNION (297)
+UNSIGNED (298)
+VOLATILE (299)
+STRING_LITERAL (300)
+LEFT_OP (301)
+RIGHT_OP (302)
+MUL_ASSIGN (303)
+DIV_ASSIGN (304)
+MOD_ASSIGN (305)
+ADD_ASSIGN (306)
+SUB_ASSIGN (307)
+LEFT_ASSIGN (308)
+RIGHT_ASSIGN (309)
+AND_ASSIGN (310)
+XOR_ASSIGN (311)
+OR_ASSIGN (312)
+PTR_OP (313)
+LOWER_THAN_ELSE (314)
+
+
+Nonterminals, with rules where they appear
+
+$accept (81)
+    on left: 0
+program (82)
+    on left: 1 2, on right: 0 2
+declaration (83)
+    on left: 3 4, on right: 2
+var_declaration (84)
+    on left: 5 6 7, on right: 3 23
+type_specifier (85)
+    on left: 8 9 10 11, on right: 5 6 7 12 13 15 17
+parameter_list (86)
+    on left: 12 13, on right: 13 17
+function_declaration (87)
+    on left: 15 17, on right: 4
+$@1 (88)
+    on left: 14, on right: 15
+$@2 (89)
+    on left: 16, on right: 17
+statement_list (90)
+    on left: 18 19, on right: 15 17 19 25
+statement (91)
+    on left: 20 21, on right: 19 38 44 48
+matched_statement (92)
+    on left: 22 23 25 26 27 28 29 30 31 32, on right: 20 36 41
+$@3 (93)
+    on left: 24, on right: 25
+unmatched_statement (94)
+    on left: 33, on right: 21 41
+if_matched (95)
+    on left: 36, on right: 26
+$@4 (96)
+    on left: 34, on right: 36
+$@5 (97)
+    on left: 35, on right: 36
+if_unmatched (98)
+    on left: 38 41, on right: 33
+$@6 (99)
+    on left: 37, on right: 38
+$@7 (100)
+    on left: 39, on right: 41
+$@8 (101)
+    on left: 40, on right: 41
+while_statement (102)
+    on left: 44, on right: 27
+$@9 (103)
+    on left: 42, on right: 44
+$@10 (104)
+    on left: 43, on right: 44
+for_statement (105)
+    on left: 48, on right: 28
+$@11 (106)
+    on left: 45, on right: 48
+$@12 (107)
+    on left: 46, on right: 48
+$@13 (108)
+    on left: 47, on right: 48
+expression (109)
+    on left: 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66
+    67, on right: 6 22 32 36 38 41 44 48 51 52 53 54 55 56 57 58 59
+    60 61 62 63 64 65 66 67
+
+
+state 0
+
+    0 $accept: . program $end
+
+    $default  reduce using rule 1 (program)
+
+    program  go to state 1
+
+
+state 1
+
+    0 $accept: program . $end
+    2 program: program . declaration
+
+    $end   shift, and go to state 2
+    INT    shift, and go to state 3
+    FLOAT  shift, and go to state 4
+    CHAR   shift, and go to state 5
+    VOID   shift, and go to state 6
+
+    declaration           go to state 7
+    var_declaration       go to state 8
+    type_specifier        go to state 9
+    function_declaration  go to state 10
+
+
+state 2
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+state 3
+
+    8 type_specifier: INT .
+
+    $default  reduce using rule 8 (type_specifier)
+
+
+state 4
+
+    9 type_specifier: FLOAT .
+
+    $default  reduce using rule 9 (type_specifier)
+
+
+state 5
+
+   10 type_specifier: CHAR .
+
+    $default  reduce using rule 10 (type_specifier)
+
+
+state 6
+
+   11 type_specifier: VOID .
+
+    $default  reduce using rule 11 (type_specifier)
+
+
+state 7
+
+    2 program: program declaration .
+
+    $default  reduce using rule 2 (program)
+
+
+state 8
+
+    3 declaration: var_declaration .
+
+    $default  reduce using rule 3 (declaration)
+
+
+state 9
+
+    5 var_declaration: type_specifier . IDENTIFIER ';'
+    6                | type_specifier . IDENTIFIER '=' expression ';'
+    7                | type_specifier . IDENTIFIER '[' NUMBER ']' ';'
+   15 function_declaration: type_specifier . IDENTIFIER '(' ')' '{' $@1 statement_list '}'
+   17                     | type_specifier . IDENTIFIER '(' parameter_list ')' '{' $@2 statement_list '}'
+
+    IDENTIFIER  shift, and go to state 11
+
+
+state 10
+
+    4 declaration: function_declaration .
+
+    $default  reduce using rule 4 (declaration)
+
+
+state 11
+
+    5 var_declaration: type_specifier IDENTIFIER . ';'
+    6                | type_specifier IDENTIFIER . '=' expression ';'
+    7                | type_specifier IDENTIFIER . '[' NUMBER ']' ';'
+   15 function_declaration: type_specifier IDENTIFIER . '(' ')' '{' $@1 statement_list '}'
+   17                     | type_specifier IDENTIFIER . '(' parameter_list ')' '{' $@2 statement_list '}'
+
+    '='  shift, and go to state 12
+    ';'  shift, and go to state 13
+    '('  shift, and go to state 14
+    '['  shift, and go to state 15
+
+
+state 12
+
+    6 var_declaration: type_specifier IDENTIFIER '=' . expression ';'
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 21
+
+
+state 13
+
+    5 var_declaration: type_specifier IDENTIFIER ';' .
+
+    $default  reduce using rule 5 (var_declaration)
+
+
+state 14
+
+   15 function_declaration: type_specifier IDENTIFIER '(' . ')' '{' $@1 statement_list '}'
+   17                     | type_specifier IDENTIFIER '(' . parameter_list ')' '{' $@2 statement_list '}'
+
+    INT    shift, and go to state 3
+    FLOAT  shift, and go to state 4
+    CHAR   shift, and go to state 5
+    VOID   shift, and go to state 6
+    ')'    shift, and go to state 22
+
+    type_specifier  go to state 23
+    parameter_list  go to state 24
+
+
+state 15
+
+    7 var_declaration: type_specifier IDENTIFIER '[' . NUMBER ']' ';'
+
+    NUMBER  shift, and go to state 25
+
+
+state 16
+
+   49 expression: IDENTIFIER .
+   67           | IDENTIFIER . '=' expression
+
+    '='  shift, and go to state 26
+
+    $default  reduce using rule 49 (expression)
+
+
+state 17
+
+   50 expression: NUMBER .
+
+    $default  reduce using rule 50 (expression)
+
+
+state 18
+
+   64 expression: '-' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 27
+
+
+state 19
+
+   65 expression: '!' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 28
+
+
+state 20
+
+   66 expression: '(' . expression ')'
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 29
+
+
+state 21
+
+    6 var_declaration: type_specifier IDENTIFIER '=' expression . ';'
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ';'     shift, and go to state 43
+
+
+state 22
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' . '{' $@1 statement_list '}'
+
+    '{'  shift, and go to state 44
+
+
+state 23
+
+   12 parameter_list: type_specifier . IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 45
+
+
+state 24
+
+   13 parameter_list: parameter_list . ',' type_specifier IDENTIFIER
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list . ')' '{' $@2 statement_list '}'
+
+    ','  shift, and go to state 46
+    ')'  shift, and go to state 47
+
+
+state 25
+
+    7 var_declaration: type_specifier IDENTIFIER '[' NUMBER . ']' ';'
+
+    ']'  shift, and go to state 48
+
+
+state 26
+
+   67 expression: IDENTIFIER '=' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 49
+
+
+state 27
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+   64           | '-' expression .
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 64 (expression)]
+    '-'       [reduce using rule 64 (expression)]
+    '*'       [reduce using rule 64 (expression)]
+    '/'       [reduce using rule 64 (expression)]
+    '%'       [reduce using rule 64 (expression)]
+    '<'       [reduce using rule 64 (expression)]
+    '>'       [reduce using rule 64 (expression)]
+    LE_OP     [reduce using rule 64 (expression)]
+    GE_OP     [reduce using rule 64 (expression)]
+    EQ_OP     [reduce using rule 64 (expression)]
+    NE_OP     [reduce using rule 64 (expression)]
+    AND_OP    [reduce using rule 64 (expression)]
+    OR_OP     [reduce using rule 64 (expression)]
+    $default  reduce using rule 64 (expression)
+
+
+state 28
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+   65           | '!' expression .
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 65 (expression)]
+    '-'       [reduce using rule 65 (expression)]
+    '*'       [reduce using rule 65 (expression)]
+    '/'       [reduce using rule 65 (expression)]
+    '%'       [reduce using rule 65 (expression)]
+    '<'       [reduce using rule 65 (expression)]
+    '>'       [reduce using rule 65 (expression)]
+    LE_OP     [reduce using rule 65 (expression)]
+    GE_OP     [reduce using rule 65 (expression)]
+    EQ_OP     [reduce using rule 65 (expression)]
+    NE_OP     [reduce using rule 65 (expression)]
+    AND_OP    [reduce using rule 65 (expression)]
+    OR_OP     [reduce using rule 65 (expression)]
+    $default  reduce using rule 65 (expression)
+
+
+state 29
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+   66           | '(' expression . ')'
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 50
+
+
+state 30
+
+   51 expression: expression '+' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 51
+
+
+state 31
+
+   52 expression: expression '-' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 52
+
+
+state 32
+
+   53 expression: expression '*' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 53
+
+
+state 33
+
+   54 expression: expression '/' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 54
+
+
+state 34
+
+   55 expression: expression '%' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 55
+
+
+state 35
+
+   58 expression: expression '<' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 56
+
+
+state 36
+
+   59 expression: expression '>' . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 57
+
+
+state 37
+
+   60 expression: expression LE_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 58
+
+
+state 38
+
+   61 expression: expression GE_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 59
+
+
+state 39
+
+   56 expression: expression EQ_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 60
+
+
+state 40
+
+   57 expression: expression NE_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 61
+
+
+state 41
+
+   62 expression: expression AND_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 62
+
+
+state 42
+
+   63 expression: expression OR_OP . expression
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 63
+
+
+state 43
+
+    6 var_declaration: type_specifier IDENTIFIER '=' expression ';' .
+
+    $default  reduce using rule 6 (var_declaration)
+
+
+state 44
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' '{' . $@1 statement_list '}'
+
+    $default  reduce using rule 14 ($@1)
+
+    $@1  go to state 64
+
+
+state 45
+
+   12 parameter_list: type_specifier IDENTIFIER .
+
+    $default  reduce using rule 12 (parameter_list)
+
+
+state 46
+
+   13 parameter_list: parameter_list ',' . type_specifier IDENTIFIER
+
+    INT    shift, and go to state 3
+    FLOAT  shift, and go to state 4
+    CHAR   shift, and go to state 5
+    VOID   shift, and go to state 6
+
+    type_specifier  go to state 65
+
+
+state 47
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' . '{' $@2 statement_list '}'
+
+    '{'  shift, and go to state 66
+
+
+state 48
+
+    7 var_declaration: type_specifier IDENTIFIER '[' NUMBER ']' . ';'
+
+    ';'  shift, and go to state 67
+
+
+state 49
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+   67           | IDENTIFIER '=' expression .
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 67 (expression)]
+    '-'       [reduce using rule 67 (expression)]
+    '*'       [reduce using rule 67 (expression)]
+    '/'       [reduce using rule 67 (expression)]
+    '%'       [reduce using rule 67 (expression)]
+    '<'       [reduce using rule 67 (expression)]
+    '>'       [reduce using rule 67 (expression)]
+    LE_OP     [reduce using rule 67 (expression)]
+    GE_OP     [reduce using rule 67 (expression)]
+    EQ_OP     [reduce using rule 67 (expression)]
+    NE_OP     [reduce using rule 67 (expression)]
+    AND_OP    [reduce using rule 67 (expression)]
+    OR_OP     [reduce using rule 67 (expression)]
+    $default  reduce using rule 67 (expression)
+
+
+state 50
+
+   66 expression: '(' expression ')' .
+
+    $default  reduce using rule 66 (expression)
+
+
+state 51
+
+   51 expression: expression . '+' expression
+   51           | expression '+' expression .
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 51 (expression)]
+    '-'       [reduce using rule 51 (expression)]
+    '*'       [reduce using rule 51 (expression)]
+    '/'       [reduce using rule 51 (expression)]
+    '%'       [reduce using rule 51 (expression)]
+    '<'       [reduce using rule 51 (expression)]
+    '>'       [reduce using rule 51 (expression)]
+    LE_OP     [reduce using rule 51 (expression)]
+    GE_OP     [reduce using rule 51 (expression)]
+    EQ_OP     [reduce using rule 51 (expression)]
+    NE_OP     [reduce using rule 51 (expression)]
+    AND_OP    [reduce using rule 51 (expression)]
+    OR_OP     [reduce using rule 51 (expression)]
+    $default  reduce using rule 51 (expression)
+
+
+state 52
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   52           | expression '-' expression .
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 52 (expression)]
+    '-'       [reduce using rule 52 (expression)]
+    '*'       [reduce using rule 52 (expression)]
+    '/'       [reduce using rule 52 (expression)]
+    '%'       [reduce using rule 52 (expression)]
+    '<'       [reduce using rule 52 (expression)]
+    '>'       [reduce using rule 52 (expression)]
+    LE_OP     [reduce using rule 52 (expression)]
+    GE_OP     [reduce using rule 52 (expression)]
+    EQ_OP     [reduce using rule 52 (expression)]
+    NE_OP     [reduce using rule 52 (expression)]
+    AND_OP    [reduce using rule 52 (expression)]
+    OR_OP     [reduce using rule 52 (expression)]
+    $default  reduce using rule 52 (expression)
+
+
+state 53
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   53           | expression '*' expression .
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 53 (expression)]
+    '-'       [reduce using rule 53 (expression)]
+    '*'       [reduce using rule 53 (expression)]
+    '/'       [reduce using rule 53 (expression)]
+    '%'       [reduce using rule 53 (expression)]
+    '<'       [reduce using rule 53 (expression)]
+    '>'       [reduce using rule 53 (expression)]
+    LE_OP     [reduce using rule 53 (expression)]
+    GE_OP     [reduce using rule 53 (expression)]
+    EQ_OP     [reduce using rule 53 (expression)]
+    NE_OP     [reduce using rule 53 (expression)]
+    AND_OP    [reduce using rule 53 (expression)]
+    OR_OP     [reduce using rule 53 (expression)]
+    $default  reduce using rule 53 (expression)
+
+
+state 54
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   54           | expression '/' expression .
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 54 (expression)]
+    '-'       [reduce using rule 54 (expression)]
+    '*'       [reduce using rule 54 (expression)]
+    '/'       [reduce using rule 54 (expression)]
+    '%'       [reduce using rule 54 (expression)]
+    '<'       [reduce using rule 54 (expression)]
+    '>'       [reduce using rule 54 (expression)]
+    LE_OP     [reduce using rule 54 (expression)]
+    GE_OP     [reduce using rule 54 (expression)]
+    EQ_OP     [reduce using rule 54 (expression)]
+    NE_OP     [reduce using rule 54 (expression)]
+    AND_OP    [reduce using rule 54 (expression)]
+    OR_OP     [reduce using rule 54 (expression)]
+    $default  reduce using rule 54 (expression)
+
+
+state 55
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   55           | expression '%' expression .
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 55 (expression)]
+    '-'       [reduce using rule 55 (expression)]
+    '*'       [reduce using rule 55 (expression)]
+    '/'       [reduce using rule 55 (expression)]
+    '%'       [reduce using rule 55 (expression)]
+    '<'       [reduce using rule 55 (expression)]
+    '>'       [reduce using rule 55 (expression)]
+    LE_OP     [reduce using rule 55 (expression)]
+    GE_OP     [reduce using rule 55 (expression)]
+    EQ_OP     [reduce using rule 55 (expression)]
+    NE_OP     [reduce using rule 55 (expression)]
+    AND_OP    [reduce using rule 55 (expression)]
+    OR_OP     [reduce using rule 55 (expression)]
+    $default  reduce using rule 55 (expression)
+
+
+state 56
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   58           | expression '<' expression .
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 58 (expression)]
+    '-'       [reduce using rule 58 (expression)]
+    '*'       [reduce using rule 58 (expression)]
+    '/'       [reduce using rule 58 (expression)]
+    '%'       [reduce using rule 58 (expression)]
+    '<'       [reduce using rule 58 (expression)]
+    '>'       [reduce using rule 58 (expression)]
+    LE_OP     [reduce using rule 58 (expression)]
+    GE_OP     [reduce using rule 58 (expression)]
+    EQ_OP     [reduce using rule 58 (expression)]
+    NE_OP     [reduce using rule 58 (expression)]
+    AND_OP    [reduce using rule 58 (expression)]
+    OR_OP     [reduce using rule 58 (expression)]
+    $default  reduce using rule 58 (expression)
+
+
+state 57
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   59           | expression '>' expression .
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 59 (expression)]
+    '-'       [reduce using rule 59 (expression)]
+    '*'       [reduce using rule 59 (expression)]
+    '/'       [reduce using rule 59 (expression)]
+    '%'       [reduce using rule 59 (expression)]
+    '<'       [reduce using rule 59 (expression)]
+    '>'       [reduce using rule 59 (expression)]
+    LE_OP     [reduce using rule 59 (expression)]
+    GE_OP     [reduce using rule 59 (expression)]
+    EQ_OP     [reduce using rule 59 (expression)]
+    NE_OP     [reduce using rule 59 (expression)]
+    AND_OP    [reduce using rule 59 (expression)]
+    OR_OP     [reduce using rule 59 (expression)]
+    $default  reduce using rule 59 (expression)
+
+
+state 58
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   60           | expression LE_OP expression .
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 60 (expression)]
+    '-'       [reduce using rule 60 (expression)]
+    '*'       [reduce using rule 60 (expression)]
+    '/'       [reduce using rule 60 (expression)]
+    '%'       [reduce using rule 60 (expression)]
+    '<'       [reduce using rule 60 (expression)]
+    '>'       [reduce using rule 60 (expression)]
+    LE_OP     [reduce using rule 60 (expression)]
+    GE_OP     [reduce using rule 60 (expression)]
+    EQ_OP     [reduce using rule 60 (expression)]
+    NE_OP     [reduce using rule 60 (expression)]
+    AND_OP    [reduce using rule 60 (expression)]
+    OR_OP     [reduce using rule 60 (expression)]
+    $default  reduce using rule 60 (expression)
+
+
+state 59
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   61           | expression GE_OP expression .
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 61 (expression)]
+    '-'       [reduce using rule 61 (expression)]
+    '*'       [reduce using rule 61 (expression)]
+    '/'       [reduce using rule 61 (expression)]
+    '%'       [reduce using rule 61 (expression)]
+    '<'       [reduce using rule 61 (expression)]
+    '>'       [reduce using rule 61 (expression)]
+    LE_OP     [reduce using rule 61 (expression)]
+    GE_OP     [reduce using rule 61 (expression)]
+    EQ_OP     [reduce using rule 61 (expression)]
+    NE_OP     [reduce using rule 61 (expression)]
+    AND_OP    [reduce using rule 61 (expression)]
+    OR_OP     [reduce using rule 61 (expression)]
+    $default  reduce using rule 61 (expression)
+
+
+state 60
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   56           | expression EQ_OP expression .
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 56 (expression)]
+    '-'       [reduce using rule 56 (expression)]
+    '*'       [reduce using rule 56 (expression)]
+    '/'       [reduce using rule 56 (expression)]
+    '%'       [reduce using rule 56 (expression)]
+    '<'       [reduce using rule 56 (expression)]
+    '>'       [reduce using rule 56 (expression)]
+    LE_OP     [reduce using rule 56 (expression)]
+    GE_OP     [reduce using rule 56 (expression)]
+    EQ_OP     [reduce using rule 56 (expression)]
+    NE_OP     [reduce using rule 56 (expression)]
+    AND_OP    [reduce using rule 56 (expression)]
+    OR_OP     [reduce using rule 56 (expression)]
+    $default  reduce using rule 56 (expression)
+
+
+state 61
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   57           | expression NE_OP expression .
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 57 (expression)]
+    '-'       [reduce using rule 57 (expression)]
+    '*'       [reduce using rule 57 (expression)]
+    '/'       [reduce using rule 57 (expression)]
+    '%'       [reduce using rule 57 (expression)]
+    '<'       [reduce using rule 57 (expression)]
+    '>'       [reduce using rule 57 (expression)]
+    LE_OP     [reduce using rule 57 (expression)]
+    GE_OP     [reduce using rule 57 (expression)]
+    EQ_OP     [reduce using rule 57 (expression)]
+    NE_OP     [reduce using rule 57 (expression)]
+    AND_OP    [reduce using rule 57 (expression)]
+    OR_OP     [reduce using rule 57 (expression)]
+    $default  reduce using rule 57 (expression)
+
+
+state 62
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   62           | expression AND_OP expression .
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 62 (expression)]
+    '-'       [reduce using rule 62 (expression)]
+    '*'       [reduce using rule 62 (expression)]
+    '/'       [reduce using rule 62 (expression)]
+    '%'       [reduce using rule 62 (expression)]
+    '<'       [reduce using rule 62 (expression)]
+    '>'       [reduce using rule 62 (expression)]
+    LE_OP     [reduce using rule 62 (expression)]
+    GE_OP     [reduce using rule 62 (expression)]
+    EQ_OP     [reduce using rule 62 (expression)]
+    NE_OP     [reduce using rule 62 (expression)]
+    AND_OP    [reduce using rule 62 (expression)]
+    OR_OP     [reduce using rule 62 (expression)]
+    $default  reduce using rule 62 (expression)
+
+
+state 63
+
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+   63           | expression OR_OP expression .
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+
+    '+'       [reduce using rule 63 (expression)]
+    '-'       [reduce using rule 63 (expression)]
+    '*'       [reduce using rule 63 (expression)]
+    '/'       [reduce using rule 63 (expression)]
+    '%'       [reduce using rule 63 (expression)]
+    '<'       [reduce using rule 63 (expression)]
+    '>'       [reduce using rule 63 (expression)]
+    LE_OP     [reduce using rule 63 (expression)]
+    GE_OP     [reduce using rule 63 (expression)]
+    EQ_OP     [reduce using rule 63 (expression)]
+    NE_OP     [reduce using rule 63 (expression)]
+    AND_OP    [reduce using rule 63 (expression)]
+    OR_OP     [reduce using rule 63 (expression)]
+    $default  reduce using rule 63 (expression)
+
+
+state 64
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' '{' $@1 . statement_list '}'
+
+    $default  reduce using rule 18 (statement_list)
+
+    statement_list  go to state 68
+
+
+state 65
+
+   13 parameter_list: parameter_list ',' type_specifier . IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 69
+
+
+state 66
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' '{' . $@2 statement_list '}'
+
+    $default  reduce using rule 16 ($@2)
+
+    $@2  go to state 70
+
+
+state 67
+
+    7 var_declaration: type_specifier IDENTIFIER '[' NUMBER ']' ';' .
+
+    $default  reduce using rule 7 (var_declaration)
+
+
+state 68
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' '{' $@1 statement_list . '}'
+   19 statement_list: statement_list . statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '}'         shift, and go to state 78
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 81
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 69
+
+   13 parameter_list: parameter_list ',' type_specifier IDENTIFIER .
+
+    $default  reduce using rule 13 (parameter_list)
+
+
+state 70
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' '{' $@2 . statement_list '}'
+
+    $default  reduce using rule 18 (statement_list)
+
+    statement_list  go to state 89
+
+
+state 71
+
+   36 if_matched: IF . '(' expression ')' $@4 matched_statement ELSE $@5 matched_statement
+   38 if_unmatched: IF . '(' expression ')' $@6 statement
+   41             | IF . '(' expression ')' $@7 matched_statement ELSE $@8 unmatched_statement
+
+    '('  shift, and go to state 90
+
+
+state 72
+
+   44 while_statement: WHILE . '(' $@9 expression ')' $@10 statement
+
+    '('  shift, and go to state 91
+
+
+state 73
+
+   48 for_statement: FOR . '(' expression ';' $@11 expression ';' $@12 expression ')' $@13 statement
+
+    '('  shift, and go to state 92
+
+
+state 74
+
+   29 matched_statement: BREAK . ';'
+
+    ';'  shift, and go to state 93
+
+
+state 75
+
+   30 matched_statement: CONTINUE . ';'
+
+    ';'  shift, and go to state 94
+
+
+state 76
+
+   31 matched_statement: RETURN . ';'
+   32                  | RETURN . expression ';'
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    ';'         shift, and go to state 95
+    '('         shift, and go to state 20
+
+    expression  go to state 96
+
+
+state 77
+
+   25 matched_statement: '{' . $@3 statement_list '}'
+
+    $default  reduce using rule 24 ($@3)
+
+    $@3  go to state 97
+
+
+state 78
+
+   15 function_declaration: type_specifier IDENTIFIER '(' ')' '{' $@1 statement_list '}' .
+
+    $default  reduce using rule 15 (function_declaration)
+
+
+state 79
+
+   23 matched_statement: var_declaration .
+
+    $default  reduce using rule 23 (matched_statement)
+
+
+state 80
+
+    5 var_declaration: type_specifier . IDENTIFIER ';'
+    6                | type_specifier . IDENTIFIER '=' expression ';'
+    7                | type_specifier . IDENTIFIER '[' NUMBER ']' ';'
+
+    IDENTIFIER  shift, and go to state 98
+
+
+state 81
+
+   19 statement_list: statement_list statement .
+
+    $default  reduce using rule 19 (statement_list)
+
+
+state 82
+
+   20 statement: matched_statement .
+
+    $default  reduce using rule 20 (statement)
+
+
+state 83
+
+   21 statement: unmatched_statement .
+
+    $default  reduce using rule 21 (statement)
+
+
+state 84
+
+   26 matched_statement: if_matched .
+
+    $default  reduce using rule 26 (matched_statement)
+
+
+state 85
+
+   33 unmatched_statement: if_unmatched .
+
+    $default  reduce using rule 33 (unmatched_statement)
+
+
+state 86
+
+   27 matched_statement: while_statement .
+
+    $default  reduce using rule 27 (matched_statement)
+
+
+state 87
+
+   28 matched_statement: for_statement .
+
+    $default  reduce using rule 28 (matched_statement)
+
+
+state 88
+
+   22 matched_statement: expression . ';'
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ';'     shift, and go to state 99
+
+
+state 89
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' '{' $@2 statement_list . '}'
+   19 statement_list: statement_list . statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '}'         shift, and go to state 100
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 81
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 90
+
+   36 if_matched: IF '(' . expression ')' $@4 matched_statement ELSE $@5 matched_statement
+   38 if_unmatched: IF '(' . expression ')' $@6 statement
+   41             | IF '(' . expression ')' $@7 matched_statement ELSE $@8 unmatched_statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 101
+
+
+state 91
+
+   44 while_statement: WHILE '(' . $@9 expression ')' $@10 statement
+
+    $default  reduce using rule 42 ($@9)
+
+    $@9  go to state 102
+
+
+state 92
+
+   48 for_statement: FOR '(' . expression ';' $@11 expression ';' $@12 expression ')' $@13 statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 103
+
+
+state 93
+
+   29 matched_statement: BREAK ';' .
+
+    $default  reduce using rule 29 (matched_statement)
+
+
+state 94
+
+   30 matched_statement: CONTINUE ';' .
+
+    $default  reduce using rule 30 (matched_statement)
+
+
+state 95
+
+   31 matched_statement: RETURN ';' .
+
+    $default  reduce using rule 31 (matched_statement)
+
+
+state 96
+
+   32 matched_statement: RETURN expression . ';'
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ';'     shift, and go to state 104
+
+
+state 97
+
+   25 matched_statement: '{' $@3 . statement_list '}'
+
+    $default  reduce using rule 18 (statement_list)
+
+    statement_list  go to state 105
+
+
+state 98
+
+    5 var_declaration: type_specifier IDENTIFIER . ';'
+    6                | type_specifier IDENTIFIER . '=' expression ';'
+    7                | type_specifier IDENTIFIER . '[' NUMBER ']' ';'
+
+    '='  shift, and go to state 12
+    ';'  shift, and go to state 13
+    '['  shift, and go to state 15
+
+
+state 99
+
+   22 matched_statement: expression ';' .
+
+    $default  reduce using rule 22 (matched_statement)
+
+
+state 100
+
+   17 function_declaration: type_specifier IDENTIFIER '(' parameter_list ')' '{' $@2 statement_list '}' .
+
+    $default  reduce using rule 17 (function_declaration)
+
+
+state 101
+
+   36 if_matched: IF '(' expression . ')' $@4 matched_statement ELSE $@5 matched_statement
+   38 if_unmatched: IF '(' expression . ')' $@6 statement
+   41             | IF '(' expression . ')' $@7 matched_statement ELSE $@8 unmatched_statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 106
+
+
+state 102
+
+   44 while_statement: WHILE '(' $@9 . expression ')' $@10 statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 107
+
+
+state 103
+
+   48 for_statement: FOR '(' expression . ';' $@11 expression ';' $@12 expression ')' $@13 statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ';'     shift, and go to state 108
+
+
+state 104
+
+   32 matched_statement: RETURN expression ';' .
+
+    $default  reduce using rule 32 (matched_statement)
+
+
+state 105
+
+   19 statement_list: statement_list . statement
+   25 matched_statement: '{' $@3 statement_list . '}'
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '}'         shift, and go to state 109
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 81
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 106
+
+   36 if_matched: IF '(' expression ')' . $@4 matched_statement ELSE $@5 matched_statement
+   38 if_unmatched: IF '(' expression ')' . $@6 statement
+   41             | IF '(' expression ')' . $@7 matched_statement ELSE $@8 unmatched_statement
+
+    INT         reduce using rule 34 ($@4)
+    INT         [reduce using rule 37 ($@6)]
+    INT         [reduce using rule 39 ($@7)]
+    FLOAT       reduce using rule 34 ($@4)
+    FLOAT       [reduce using rule 37 ($@6)]
+    FLOAT       [reduce using rule 39 ($@7)]
+    CHAR        reduce using rule 34 ($@4)
+    CHAR        [reduce using rule 37 ($@6)]
+    CHAR        [reduce using rule 39 ($@7)]
+    VOID        reduce using rule 34 ($@4)
+    VOID        [reduce using rule 37 ($@6)]
+    VOID        [reduce using rule 39 ($@7)]
+    IF          reduce using rule 34 ($@4)
+    IF          [reduce using rule 37 ($@6)]
+    IF          [reduce using rule 39 ($@7)]
+    WHILE       reduce using rule 34 ($@4)
+    WHILE       [reduce using rule 37 ($@6)]
+    WHILE       [reduce using rule 39 ($@7)]
+    FOR         reduce using rule 34 ($@4)
+    FOR         [reduce using rule 37 ($@6)]
+    FOR         [reduce using rule 39 ($@7)]
+    BREAK       reduce using rule 34 ($@4)
+    BREAK       [reduce using rule 37 ($@6)]
+    BREAK       [reduce using rule 39 ($@7)]
+    CONTINUE    reduce using rule 34 ($@4)
+    CONTINUE    [reduce using rule 37 ($@6)]
+    CONTINUE    [reduce using rule 39 ($@7)]
+    RETURN      reduce using rule 34 ($@4)
+    RETURN      [reduce using rule 37 ($@6)]
+    RETURN      [reduce using rule 39 ($@7)]
+    IDENTIFIER  reduce using rule 34 ($@4)
+    IDENTIFIER  [reduce using rule 37 ($@6)]
+    IDENTIFIER  [reduce using rule 39 ($@7)]
+    NUMBER      reduce using rule 34 ($@4)
+    NUMBER      [reduce using rule 37 ($@6)]
+    NUMBER      [reduce using rule 39 ($@7)]
+    '-'         reduce using rule 34 ($@4)
+    '-'         [reduce using rule 37 ($@6)]
+    '-'         [reduce using rule 39 ($@7)]
+    '!'         reduce using rule 34 ($@4)
+    '!'         [reduce using rule 37 ($@6)]
+    '!'         [reduce using rule 39 ($@7)]
+    '{'         reduce using rule 34 ($@4)
+    '{'         [reduce using rule 37 ($@6)]
+    '{'         [reduce using rule 39 ($@7)]
+    '('         reduce using rule 34 ($@4)
+    '('         [reduce using rule 37 ($@6)]
+    '('         [reduce using rule 39 ($@7)]
+    $default    reduce using rule 34 ($@4)
+
+    $@4  go to state 110
+    $@6  go to state 111
+    $@7  go to state 112
+
+
+state 107
+
+   44 while_statement: WHILE '(' $@9 expression . ')' $@10 statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 113
+
+
+state 108
+
+   48 for_statement: FOR '(' expression ';' . $@11 expression ';' $@12 expression ')' $@13 statement
+
+    $default  reduce using rule 45 ($@11)
+
+    $@11  go to state 114
+
+
+state 109
+
+   25 matched_statement: '{' $@3 statement_list '}' .
+
+    $default  reduce using rule 25 (matched_statement)
+
+
+state 110
+
+   36 if_matched: IF '(' expression ')' $@4 . matched_statement ELSE $@5 matched_statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 115
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration    go to state 79
+    type_specifier     go to state 80
+    matched_statement  go to state 116
+    if_matched         go to state 84
+    while_statement    go to state 86
+    for_statement      go to state 87
+    expression         go to state 88
+
+
+state 111
+
+   38 if_unmatched: IF '(' expression ')' $@6 . statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 117
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 112
+
+   41 if_unmatched: IF '(' expression ')' $@7 . matched_statement ELSE $@8 unmatched_statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 115
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration    go to state 79
+    type_specifier     go to state 80
+    matched_statement  go to state 118
+    if_matched         go to state 84
+    while_statement    go to state 86
+    for_statement      go to state 87
+    expression         go to state 88
+
+
+state 113
+
+   44 while_statement: WHILE '(' $@9 expression ')' . $@10 statement
+
+    $default  reduce using rule 43 ($@10)
+
+    $@10  go to state 119
+
+
+state 114
+
+   48 for_statement: FOR '(' expression ';' $@11 . expression ';' $@12 expression ')' $@13 statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 120
+
+
+state 115
+
+   36 if_matched: IF . '(' expression ')' $@4 matched_statement ELSE $@5 matched_statement
+
+    '('  shift, and go to state 121
+
+
+state 116
+
+   36 if_matched: IF '(' expression ')' $@4 matched_statement . ELSE $@5 matched_statement
+
+    ELSE  shift, and go to state 122
+
+
+state 117
+
+   38 if_unmatched: IF '(' expression ')' $@6 statement .
+
+    $default  reduce using rule 38 (if_unmatched)
+
+
+state 118
+
+   41 if_unmatched: IF '(' expression ')' $@7 matched_statement . ELSE $@8 unmatched_statement
+
+    ELSE  shift, and go to state 123
+
+
+state 119
+
+   44 while_statement: WHILE '(' $@9 expression ')' $@10 . statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 124
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 120
+
+   48 for_statement: FOR '(' expression ';' $@11 expression . ';' $@12 expression ')' $@13 statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ';'     shift, and go to state 125
+
+
+state 121
+
+   36 if_matched: IF '(' . expression ')' $@4 matched_statement ELSE $@5 matched_statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 126
+
+
+state 122
+
+   36 if_matched: IF '(' expression ')' $@4 matched_statement ELSE . $@5 matched_statement
+
+    $default  reduce using rule 35 ($@5)
+
+    $@5  go to state 127
+
+
+state 123
+
+   41 if_unmatched: IF '(' expression ')' $@7 matched_statement ELSE . $@8 unmatched_statement
+
+    $default  reduce using rule 40 ($@8)
+
+    $@8  go to state 128
+
+
+state 124
+
+   44 while_statement: WHILE '(' $@9 expression ')' $@10 statement .
+
+    $default  reduce using rule 44 (while_statement)
+
+
+state 125
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' . $@12 expression ')' $@13 statement
+
+    $default  reduce using rule 46 ($@12)
+
+    $@12  go to state 129
+
+
+state 126
+
+   36 if_matched: IF '(' expression . ')' $@4 matched_statement ELSE $@5 matched_statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 130
+
+
+state 127
+
+   36 if_matched: IF '(' expression ')' $@4 matched_statement ELSE $@5 . matched_statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 115
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration    go to state 79
+    type_specifier     go to state 80
+    matched_statement  go to state 131
+    if_matched         go to state 84
+    while_statement    go to state 86
+    for_statement      go to state 87
+    expression         go to state 88
+
+
+state 128
+
+   41 if_unmatched: IF '(' expression ')' $@7 matched_statement ELSE $@8 . unmatched_statement
+
+    IF  shift, and go to state 132
+
+    unmatched_statement  go to state 133
+    if_unmatched         go to state 85
+
+
+state 129
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 . expression ')' $@13 statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 134
+
+
+state 130
+
+   36 if_matched: IF '(' expression ')' . $@4 matched_statement ELSE $@5 matched_statement
+
+    $default  reduce using rule 34 ($@4)
+
+    $@4  go to state 110
+
+
+state 131
+
+   36 if_matched: IF '(' expression ')' $@4 matched_statement ELSE $@5 matched_statement .
+
+    $default  reduce using rule 36 (if_matched)
+
+
+state 132
+
+   38 if_unmatched: IF . '(' expression ')' $@6 statement
+   41             | IF . '(' expression ')' $@7 matched_statement ELSE $@8 unmatched_statement
+
+    '('  shift, and go to state 135
+
+
+state 133
+
+   41 if_unmatched: IF '(' expression ')' $@7 matched_statement ELSE $@8 unmatched_statement .
+
+    $default  reduce using rule 41 (if_unmatched)
+
+
+state 134
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 expression . ')' $@13 statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 136
+
+
+state 135
+
+   38 if_unmatched: IF '(' . expression ')' $@6 statement
+   41             | IF '(' . expression ')' $@7 matched_statement ELSE $@8 unmatched_statement
+
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '('         shift, and go to state 20
+
+    expression  go to state 137
+
+
+state 136
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 expression ')' . $@13 statement
+
+    $default  reduce using rule 47 ($@13)
+
+    $@13  go to state 138
+
+
+state 137
+
+   38 if_unmatched: IF '(' expression . ')' $@6 statement
+   41             | IF '(' expression . ')' $@7 matched_statement ELSE $@8 unmatched_statement
+   51 expression: expression . '+' expression
+   52           | expression . '-' expression
+   53           | expression . '*' expression
+   54           | expression . '/' expression
+   55           | expression . '%' expression
+   56           | expression . EQ_OP expression
+   57           | expression . NE_OP expression
+   58           | expression . '<' expression
+   59           | expression . '>' expression
+   60           | expression . LE_OP expression
+   61           | expression . GE_OP expression
+   62           | expression . AND_OP expression
+   63           | expression . OR_OP expression
+
+    '+'     shift, and go to state 30
+    '-'     shift, and go to state 31
+    '*'     shift, and go to state 32
+    '/'     shift, and go to state 33
+    '%'     shift, and go to state 34
+    '<'     shift, and go to state 35
+    '>'     shift, and go to state 36
+    LE_OP   shift, and go to state 37
+    GE_OP   shift, and go to state 38
+    EQ_OP   shift, and go to state 39
+    NE_OP   shift, and go to state 40
+    AND_OP  shift, and go to state 41
+    OR_OP   shift, and go to state 42
+    ')'     shift, and go to state 139
+
+
+state 138
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 expression ')' $@13 . statement
+
+    INT         shift, and go to state 3
+    FLOAT       shift, and go to state 4
+    CHAR        shift, and go to state 5
+    VOID        shift, and go to state 6
+    IF          shift, and go to state 71
+    WHILE       shift, and go to state 72
+    FOR         shift, and go to state 73
+    BREAK       shift, and go to state 74
+    CONTINUE    shift, and go to state 75
+    RETURN      shift, and go to state 76
+    IDENTIFIER  shift, and go to state 16
+    NUMBER      shift, and go to state 17
+    '-'         shift, and go to state 18
+    '!'         shift, and go to state 19
+    '{'         shift, and go to state 77
+    '('         shift, and go to state 20
+
+    var_declaration      go to state 79
+    type_specifier       go to state 80
+    statement            go to state 140
+    matched_statement    go to state 82
+    unmatched_statement  go to state 83
+    if_matched           go to state 84
+    if_unmatched         go to state 85
+    while_statement      go to state 86
+    for_statement        go to state 87
+    expression           go to state 88
+
+
+state 139
+
+   38 if_unmatched: IF '(' expression ')' . $@6 statement
+   41             | IF '(' expression ')' . $@7 matched_statement ELSE $@8 unmatched_statement
+
+    INT         reduce using rule 37 ($@6)
+    INT         [reduce using rule 39 ($@7)]
+    FLOAT       reduce using rule 37 ($@6)
+    FLOAT       [reduce using rule 39 ($@7)]
+    CHAR        reduce using rule 37 ($@6)
+    CHAR        [reduce using rule 39 ($@7)]
+    VOID        reduce using rule 37 ($@6)
+    VOID        [reduce using rule 39 ($@7)]
+    IF          reduce using rule 37 ($@6)
+    IF          [reduce using rule 39 ($@7)]
+    WHILE       reduce using rule 37 ($@6)
+    WHILE       [reduce using rule 39 ($@7)]
+    FOR         reduce using rule 37 ($@6)
+    FOR         [reduce using rule 39 ($@7)]
+    BREAK       reduce using rule 37 ($@6)
+    BREAK       [reduce using rule 39 ($@7)]
+    CONTINUE    reduce using rule 37 ($@6)
+    CONTINUE    [reduce using rule 39 ($@7)]
+    RETURN      reduce using rule 37 ($@6)
+    RETURN      [reduce using rule 39 ($@7)]
+    IDENTIFIER  reduce using rule 37 ($@6)
+    IDENTIFIER  [reduce using rule 39 ($@7)]
+    NUMBER      reduce using rule 37 ($@6)
+    NUMBER      [reduce using rule 39 ($@7)]
+    '-'         reduce using rule 37 ($@6)
+    '-'         [reduce using rule 39 ($@7)]
+    '!'         reduce using rule 37 ($@6)
+    '!'         [reduce using rule 39 ($@7)]
+    '{'         reduce using rule 37 ($@6)
+    '{'         [reduce using rule 39 ($@7)]
+    '('         reduce using rule 37 ($@6)
+    '('         [reduce using rule 39 ($@7)]
+    $default    reduce using rule 37 ($@6)
+
+    $@6  go to state 111
+    $@7  go to state 112
+
+
+state 140
+
+   48 for_statement: FOR '(' expression ';' $@11 expression ';' $@12 expression ')' $@13 statement .
+
+    $default  reduce using rule 48 (for_statement)

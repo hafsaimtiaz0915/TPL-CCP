@@ -1,4 +1,8 @@
 #include "codegen.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 /* Create code generator */
 CodeGenerator* create_code_generator(SymbolTable *st) {
@@ -8,17 +12,24 @@ CodeGenerator* create_code_generator(SymbolTable *st) {
         return NULL;
     }
     
-    cg->instr_capacity = 1000;
-    cg->instructions = (IRInstruction *)malloc(cg->instr_capacity * sizeof(IRInstruction));
-    if (cg->instructions == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed for instructions\n");
+    cg->code_capacity = 1000;
+    cg->code = (TACInstruction *)malloc(cg->code_capacity * sizeof(TACInstruction));
+    if (cg->code == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for TAC code\n");
         free(cg);
         return NULL;
     }
     
-    cg->instr_count = 0;
+    cg->code_size = 0;
+    cg->temp_counter = 0;
     cg->label_counter = 0;
     cg->sym_table = st;
+    
+    /* Initialize label mapping */
+    cg->label_map_capacity = 50;
+    cg->label_names = (char **)malloc(cg->label_map_capacity * sizeof(char *));
+    cg->label_indices = (int *)malloc(cg->label_map_capacity * sizeof(int));
+    cg->label_map_count = 0;
     
     return cg;
 }
@@ -26,174 +37,364 @@ CodeGenerator* create_code_generator(SymbolTable *st) {
 /* Destroy code generator */
 void destroy_code_generator(CodeGenerator *cg) {
     if (cg != NULL) {
-        if (cg->instructions != NULL) {
-            free(cg->instructions);
+        if (cg->code != NULL) {
+            free(cg->code);
+        }
+        if (cg->label_names != NULL) {
+            for (int i = 0; i < cg->label_map_count; i++) {
+                if (cg->label_names[i] != NULL) {
+                    free(cg->label_names[i]);
+                }
+            }
+            free(cg->label_names);
+        }
+        if (cg->label_indices != NULL) {
+            free(cg->label_indices);
         }
         free(cg);
     }
 }
 
-/* Emit a generic instruction */
-void emit_instruction(CodeGenerator *cg, IROpcode opcode, int arg, int line) {
+/* Emit generic TAC instruction */
+void emit_tac(CodeGenerator *cg, TACOpcode op, 
+              const char *result, const char *arg1, const char *arg2, 
+              int arg1_is_const, int arg2_is_const, int line) {
     if (cg == NULL) return;
     
     /* Expand capacity if needed */
-    if (cg->instr_count >= cg->instr_capacity) {
-        cg->instr_capacity *= 2;
-        IRInstruction *new_instrs = (IRInstruction *)realloc(cg->instructions, 
-                                                             cg->instr_capacity * sizeof(IRInstruction));
-        if (new_instrs == NULL) {
-            fprintf(stderr, "Error: Memory reallocation failed for instructions\n");
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        TACInstruction *new_code = (TACInstruction *)realloc(cg->code, 
+                                                              cg->code_capacity * sizeof(TACInstruction));
+        if (new_code == NULL) {
+            fprintf(stderr, "Error: Memory reallocation failed for TAC code\n");
             return;
         }
-        cg->instructions = new_instrs;
+        cg->code = new_code;
     }
     
-    cg->instructions[cg->instr_count].opcode = opcode;
-    cg->instructions[cg->instr_count].arg = arg;
-    cg->instructions[cg->instr_count].line_num = line;
-    cg->instr_count++;
-}
-
-/* Emit push constant instruction */
-void emit_push_const(CodeGenerator *cg, int value, int line) {
-    emit_instruction(cg, PUSH_CONST, value, line);
-}
-
-/* Emit push variable instruction */
-void emit_push_var(CodeGenerator *cg, const char *var_name, int line) {
-    if (cg == NULL || var_name == NULL) return;
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = op;
+    instr->line_num = line;
+    instr->arg1_is_const = arg1_is_const;
+    instr->arg2_is_const = arg2_is_const;
+    instr->const_val1 = 0;
+    instr->const_val2 = 0;
     
-    /* Look up variable in symbol table */
-    Symbol *sym = lookup_symbol(cg->sym_table, var_name);
-    if (sym != NULL) {
-        /* Use symbol index as argument */
-        int sym_index = 0;
-        for (int i = 0; i < cg->sym_table->count; i++) {
-            if (strcmp(cg->sym_table->symbols[i].name, var_name) == 0) {
-                sym_index = i;
-                break;
-            }
+    if (result) strncpy(instr->result, result, 255);
+    else instr->result[0] = '\0';
+    
+    if (arg1) strncpy(instr->arg1, arg1, 255);
+    else instr->arg1[0] = '\0';
+    
+    if (arg2) strncpy(instr->arg2, arg2, 255);
+    else instr->arg2[0] = '\0';
+}
+
+/* Emit TAC with constant value */
+void emit_tac_const(CodeGenerator *cg, TACOpcode op,
+                    const char *result, const char *arg1, int const_val,
+                    int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        TACInstruction *new_code = (TACInstruction *)realloc(cg->code, 
+                                                              cg->code_capacity * sizeof(TACInstruction));
+        if (new_code == NULL) return;
+        cg->code = new_code;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = op;
+    instr->line_num = line;
+    instr->arg1_is_const = 1;
+    instr->arg2_is_const = 0;
+    instr->const_val1 = const_val;
+    instr->const_val2 = 0;
+    
+    if (result) strncpy(instr->result, result, 255);
+    else instr->result[0] = '\0';
+    
+    if (arg1) strncpy(instr->arg1, arg1, 255);
+    else instr->arg1[0] = '\0';
+    
+    instr->arg2[0] = '\0';
+}
+
+/* Check if string is a numeric constant */
+static int is_numeric_constant(const char *str) {
+    if (!str || *str == '\0') return 0;
+    
+    int i = 0;
+    if (str[0] == '-' || str[0] == '+') i = 1;
+    
+    int has_digits = 0;
+    for (; str[i] != '\0'; i++) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            has_digits = 1;
+        } else if (str[i] == '.') {
+            continue;  /* Allow decimal point */
+        } else {
+            return 0;
         }
-        emit_instruction(cg, PUSH_VAR, sym_index, line);
     }
+    return has_digits;
 }
 
-/* Emit pop to variable instruction */
-void emit_pop_var(CodeGenerator *cg, const char *var_name, int line) {
-    if (cg == NULL || var_name == NULL) return;
+/* Emit binary operation */
+void emit_tac_binary(CodeGenerator *cg, TACOpcode op, const char *result,
+                     const char *left, const char *right, int line) {
+    if (cg == NULL) return;
     
-    /* Look up variable in symbol table */
-    Symbol *sym = lookup_symbol(cg->sym_table, var_name);
-    if (sym != NULL) {
-        /* Use symbol index as argument */
-        int sym_index = 0;
-        for (int i = 0; i < cg->sym_table->count; i++) {
-            if (strcmp(cg->sym_table->symbols[i].name, var_name) == 0) {
-                sym_index = i;
-                break;
-            }
-        }
-        emit_instruction(cg, POP_VAR, sym_index, line);
+    int left_is_const = is_numeric_constant(left);
+    int right_is_const = is_numeric_constant(right);
+    
+    int64_t left_val = 0, right_val = 0;
+    
+    if (left_is_const && left) {
+        left_val = atoll(left);
     }
+    if (right_is_const && right) {
+        right_val = atoll(right);
+    }
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        TACInstruction *new_code = (TACInstruction *)realloc(cg->code, 
+                                                              cg->code_capacity * sizeof(TACInstruction));
+        if (new_code == NULL) return;
+        cg->code = new_code;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = op;
+    instr->line_num = line;
+    instr->arg1_is_const = left_is_const;
+    instr->arg2_is_const = right_is_const;
+    instr->const_val1 = left_val;
+    instr->const_val2 = right_val;
+    
+    if (result) strncpy(instr->result, result, 255);
+    else instr->result[0] = '\0';
+    
+    if (left) strncpy(instr->arg1, left, 255);
+    else instr->arg1[0] = '\0';
+    
+    if (right) strncpy(instr->arg2, right, 255);
+    else instr->arg2[0] = '\0';
 }
 
-/* Emit arithmetic operation */
-void emit_arithmetic(CodeGenerator *cg, IROpcode op, int line) {
-    emit_instruction(cg, op, 0, line);
+/* Emit unary operation */
+void emit_tac_unary(CodeGenerator *cg, TACOpcode op, const char *result,
+                    const char *operand, int line) {
+    emit_tac(cg, op, result, operand, NULL, 0, 0, line);
 }
 
-/* Emit comparison operation */
-void emit_comparison(CodeGenerator *cg, IROpcode op, int line) {
-    emit_instruction(cg, op, 0, line);
-}
-
-/* Emit label instruction */
-void emit_label(CodeGenerator *cg, int label_id, int line) {
-    emit_instruction(cg, OP_LABEL, label_id, line);
+/* Emit label */
+void emit_tac_label(CodeGenerator *cg, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_LABEL;
+    instr->line_num = line;
+    sprintf(instr->result, "L%d", label_id);
+    instr->arg1[0] = '\0';
+    instr->arg2[0] = '\0';
 }
 
 /* Emit unconditional jump */
-void emit_jump(CodeGenerator *cg, int label_id, int line) {
-    emit_instruction(cg, OP_JMP, label_id, line);
+void emit_tac_goto(CodeGenerator *cg, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_GOTO;
+    instr->line_num = line;
+    instr->result[0] = '\0';
+    sprintf(instr->arg1, "L%d", label_id);
+    instr->arg2[0] = '\0';
 }
 
-/* Emit conditional jump (jump if false) */
-void emit_jump_false(CodeGenerator *cg, int label_id, int line) {
-    emit_instruction(cg, OP_JMP_FALSE, label_id, line);
+/* Emit conditional jump */
+void emit_tac_ifgoto(CodeGenerator *cg, const char *cond, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_IFGOTO;
+    instr->line_num = line;
+    if (cond) strncpy(instr->result, cond, 255);
+    else instr->result[0] = '\0';
+    sprintf(instr->arg1, "L%d", label_id);
+    instr->arg2[0] = '\0';
 }
 
-/* Create a new label */
+/* Emit conditional jump (if not) */
+void emit_tac_ifnot_goto(CodeGenerator *cg, const char *cond, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_IFNOT_GOTO;
+    instr->line_num = line;
+    if (cond) strncpy(instr->result, cond, 255);
+    else instr->result[0] = '\0';
+    sprintf(instr->arg1, "L%d", label_id);
+    instr->arg2[0] = '\0';
+}
+
+/* Emit if-false conditional jump: if (!cond) goto label */
+void emit_tac_if_false(CodeGenerator *cg, const char *cond, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_IF_FALSE;
+    instr->line_num = line;
+    instr->result[0] = '\0';
+    if (cond) strncpy(instr->arg1, cond, 255);
+    else instr->arg1[0] = '\0';
+    sprintf(instr->arg2, "L%d", label_id);
+}
+
+/* Emit if-true conditional jump: if (cond) goto label */
+void emit_tac_if_true(CodeGenerator *cg, const char *cond, int label_id, int line) {
+    if (cg == NULL) return;
+    
+    if (cg->code_size >= cg->code_capacity) {
+        cg->code_capacity *= 2;
+        cg->code = (TACInstruction *)realloc(cg->code, cg->code_capacity * sizeof(TACInstruction));
+        if (cg->code == NULL) return;
+    }
+    
+    TACInstruction *instr = &cg->code[cg->code_size++];
+    instr->op = TAC_IF_TRUE;
+    instr->line_num = line;
+    instr->result[0] = '\0';
+    if (cond) strncpy(instr->arg1, cond, 255);
+    else instr->arg1[0] = '\0';
+    sprintf(instr->arg2, "L%d", label_id);
+}
+
+/* Generate temporary variable */
+char* get_temp_var(CodeGenerator *cg) {
+    static char temp_name[256];
+    if (cg == NULL) return NULL;
+    sprintf(temp_name, "t%d", cg->temp_counter++);
+    return temp_name;
+}
+
+/* Create unique label */
 int create_label(CodeGenerator *cg) {
     if (cg == NULL) return -1;
     return cg->label_counter++;
 }
 
-/* Get opcode name for printing */
-const char* opcode_name(IROpcode opcode) {
-    switch (opcode) {
-        case PUSH_CONST:     return "PUSH_CONST";
-        case PUSH_VAR:       return "PUSH_VAR";
-        case POP_VAR:        return "POP_VAR";
-        case OP_ADD:         return "ADD";
-        case OP_SUB:         return "SUB";
-        case OP_MUL:         return "MUL";
-        case OP_DIV:         return "DIV";
-        case OP_MOD:         return "MOD";
-        case OP_NEG:         return "NEG";
-        case OP_AND:         return "AND";
-        case OP_OR:          return "OR";
-        case OP_XOR:         return "XOR";
-        case OP_NOT:         return "NOT";
-        case OP_SHL:         return "SHL";
-        case OP_SHR:         return "SHR";
-        case OP_LOGIC_AND:   return "LOGIC_AND";
-        case OP_LOGIC_OR:    return "LOGIC_OR";
-        case OP_LOGIC_NOT:   return "LOGIC_NOT";
-        case OP_CMP_EQ:      return "CMP_EQ";
-        case OP_CMP_NE:      return "CMP_NE";
-        case OP_CMP_LT:      return "CMP_LT";
-        case OP_CMP_LE:      return "CMP_LE";
-        case OP_CMP_GT:      return "CMP_GT";
-        case OP_CMP_GE:      return "CMP_GE";
-        case OP_JMP:         return "JMP";
-        case OP_JMP_FALSE:   return "JMP_FALSE";
-        case OP_LABEL:       return "LABEL";
-        case OP_CALL:        return "CALL";
-        case OP_RET:         return "RET";
-        case OP_LOAD_ARRAY:  return "LOAD_ARRAY";
-        case OP_STORE_ARRAY: return "STORE_ARRAY";
-        case OP_NOP:         return "NOP";
-        case OP_HALT:        return "HALT";
-        case OP_INC:         return "INC";
-        case OP_DEC:         return "DEC";
+/* Get TAC opcode name */
+const char* tac_opcode_name(TACOpcode op) {
+    switch (op) {
+        case TAC_ADD:        return "ADD";
+        case TAC_SUB:        return "SUB";
+        case TAC_MUL:        return "MUL";
+        case TAC_DIV:        return "DIV";
+        case TAC_MOD:        return "MOD";
+        case TAC_NEG:        return "NEG";
+        case TAC_NOT:        return "NOT";
+        case TAC_ASSIGN:     return "ASSIGN";
+        case TAC_ASSIGN_CONST: return "ASSIGN_CONST";
+        case TAC_EQ:         return "EQ";
+        case TAC_NE:         return "NE";
+        case TAC_LT:         return "LT";
+        case TAC_LE:         return "LE";
+        case TAC_GT:         return "GT";
+        case TAC_GE:         return "GE";
+        case TAC_AND:        return "AND";
+        case TAC_OR:         return "OR";
+        case TAC_ARRAY_LOAD: return "ARRAY_LOAD";
+        case TAC_ARRAY_STORE: return "ARRAY_STORE";
+        case TAC_LABEL:      return "LABEL";
+        case TAC_GOTO:       return "GOTO";
+        case TAC_IF_FALSE:   return "IF_FALSE";
+        case TAC_IF_TRUE:    return "IF_TRUE";
+        case TAC_IFGOTO:     return "IFGOTO";
+        case TAC_IFNOT_GOTO: return "IFNOT_GOTO";
+        case TAC_PARAM:      return "PARAM";
+        case TAC_CALL:       return "CALL";
+        case TAC_RETURN:     return "RETURN";
+        case TAC_FUNC_START: return "FUNC_START";
+        case TAC_FUNC_END:   return "FUNC_END";
+        case TAC_NOP:        return "NOP";
+        case TAC_HALT:       return "HALT";
         default:             return "UNKNOWN";
     }
 }
 
-/* Print IR to stdout */
-void print_ir(CodeGenerator *cg) {
+/* Print TAC to stdout */
+void print_tac(CodeGenerator *cg) {
     if (cg == NULL) return;
     
-    printf("\n=== GENERATED IR CODE (Stack-Based VM) ===\n");
-    printf("%-6s %-15s %-10s %-8s\n", "Addr", "Opcode", "Arg", "Line");
-    printf("-------------------------------------------\n");
+    printf("\n=== GENERATED THREE ADDRESS CODE (TAC) ===\n");
+    printf("%-4s %-15s %-15s %-15s %-15s %-8s\n", 
+           "Seq", "Op", "Result", "Arg1", "Arg2", "Line");
+    printf("================================================================================\n");
     
-    for (int i = 0; i < cg->instr_count; i++) {
-        IRInstruction *instr = &cg->instructions[i];
-        printf("%-6d %-15s %-10d %-8d\n", 
-               i, 
-               opcode_name(instr->opcode), 
-               instr->arg, 
+    for (int i = 0; i < cg->code_size; i++) {
+        TACInstruction *instr = &cg->code[i];
+        char arg1[30], arg2[30];
+        
+        if (instr->arg1_is_const) {
+            sprintf(arg1, "%d", instr->const_val1);
+        } else {
+            strncpy(arg1, instr->arg1, 29);
+        }
+        
+        if (instr->arg2_is_const) {
+            sprintf(arg2, "%d", instr->const_val2);
+        } else {
+            strncpy(arg2, instr->arg2, 29);
+        }
+        
+        printf("%-4d %-15s %-15s %-15s %-15s %-8d\n",
+               i,
+               tac_opcode_name(instr->op),
+               instr->result,
+               arg1,
+               arg2,
                instr->line_num);
     }
-    
-    printf("-------------------------------------------\n");
-    printf("Total Instructions: %d\n\n", cg->instr_count);
+    printf("================================================================================\n");
+    printf("Total Instructions: %d\n\n", cg->code_size);
 }
 
-/* Save IR to file */
-void save_ir(CodeGenerator *cg, const char *filename) {
+/* Save TAC to file */
+void save_tac(CodeGenerator *cg, const char *filename) {
     if (cg == NULL || filename == NULL) return;
     
     FILE *f = fopen(filename, "w");
@@ -202,21 +403,38 @@ void save_ir(CodeGenerator *cg, const char *filename) {
         return;
     }
     
-    fprintf(f, "=== GENERATED IR CODE (Stack-Based VM) ===\n");
-    fprintf(f, "%-6s %-15s %-10s %-8s\n", "Addr", "Opcode", "Arg", "Line");
-    fprintf(f, "-------------------------------------------\n");
+    fprintf(f, "=== GENERATED THREE ADDRESS CODE (TAC) ===\n");
+    fprintf(f, "%-4s %-15s %-15s %-15s %-15s %-8s\n", 
+            "Seq", "Op", "Result", "Arg1", "Arg2", "Line");
+    fprintf(f, "================================================================================\n");
     
-    for (int i = 0; i < cg->instr_count; i++) {
-        IRInstruction *instr = &cg->instructions[i];
-        fprintf(f, "%-6d %-15s %-10d %-8d\n", 
-                i, 
-                opcode_name(instr->opcode), 
-                instr->arg, 
+    for (int i = 0; i < cg->code_size; i++) {
+        TACInstruction *instr = &cg->code[i];
+        char arg1[30], arg2[30];
+        
+        if (instr->arg1_is_const) {
+            sprintf(arg1, "%d", instr->const_val1);
+        } else {
+            strncpy(arg1, instr->arg1, 29);
+        }
+        
+        if (instr->arg2_is_const) {
+            sprintf(arg2, "%d", instr->const_val2);
+        } else {
+            strncpy(arg2, instr->arg2, 29);
+        }
+        
+        fprintf(f, "%-4d %-15s %-15s %-15s %-15s %-8d\n",
+                i,
+                tac_opcode_name(instr->op),
+                instr->result,
+                arg1,
+                arg2,
                 instr->line_num);
     }
-    
-    fprintf(f, "-------------------------------------------\n");
-    fprintf(f, "Total Instructions: %d\n", cg->instr_count);
+    fprintf(f, "================================================================================\n");
+    fprintf(f, "Total Instructions: %d\n", cg->code_size);
     
     fclose(f);
+    printf("[OK] TAC code saved to %s\n", filename);
 }
