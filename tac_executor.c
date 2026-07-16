@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 ExecutionContext* create_exec_context(void) {
     ExecutionContext *ctx = (ExecutionContext*)malloc(sizeof(ExecutionContext));
@@ -51,9 +52,34 @@ int64_t get_variable_value(ExecutionContext *ctx, const char *name) {
 
 static int64_t evaluate_operand(ExecutionContext *ctx, const char *operand, 
                                 int is_const, int64_t const_val) {
+    if (operand == NULL || operand[0] == '\0') {
+        return 0;
+    }
+
     if (is_const) {
         return const_val;
     }
+
+    /* Fallback: interpret numeric literal operands even if const flag is missing. */
+    {
+        const char *p = operand;
+        if (*p == '+' || *p == '-') p++;
+        if (*p != '\0') {
+            int all_digits = 1;
+            const char *q = p;
+            while (*q) {
+                if (!isdigit((unsigned char)*q)) {
+                    all_digits = 0;
+                    break;
+                }
+                q++;
+            }
+            if (all_digits) {
+                return strtoll(operand, NULL, 10);
+            }
+        }
+    }
+
     return get_variable_value(ctx, operand);
 }
 

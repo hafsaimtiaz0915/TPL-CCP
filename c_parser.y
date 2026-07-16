@@ -23,6 +23,9 @@ int label_counter = 0;
 int loop_start_stack[100];  /* Stack for loop start labels */
 int loop_end_stack[100];    /* Stack for loop end labels */
 int loop_label_top = -1;    /* Stack pointer */
+int if_else_stack[100];     /* Stack for if/else labels */
+int if_end_stack[100];      /* Stack for if/else end labels */
+int if_label_top = -1;      /* Stack pointer for if/else */
 
 void yyerror(const char *s);
 
@@ -57,6 +60,22 @@ int peek_loop_end(void) {
         return loop_end_stack[loop_label_top];
     }
     return -1;
+}
+
+void push_if_labels(int else_label, int end_label) {
+    if (if_label_top < 99) {
+        if_label_top++;
+        if_else_stack[if_label_top] = else_label;
+        if_end_stack[if_label_top] = end_label;
+    }
+}
+
+void pop_if_labels(int *else_label, int *end_label) {
+    if (if_label_top >= 0) {
+        *else_label = if_else_stack[if_label_top];
+        *end_label = if_end_stack[if_label_top];
+        if_label_top--;
+    }
 }
 
 %}
@@ -118,10 +137,18 @@ var_declaration
         free($2);
     }
     | type_specifier IDENTIFIER '=' expression ';' {
+        Symbol *sym;
         if (insert_symbol(sym_table, $2, $1, line_num, 0) == 0) {
             fprintf(stderr, "SEMANTIC ERROR at line %d: Variable '%s' already declared\n", line_num, $2);
             semantic_error_count++;
+        } else {
+            sym = lookup_symbol_in_scope(sym_table, $2, sym_table->scope_level);
+            if (sym) {
+                sym->initialized = 1;
+            }
         }
+        /* Emit TAC for declaration-time initialization, e.g., int x = 5; */
+        emit_tac_binary(code_gen, TAC_ASSIGN, $2, $4, NULL, line_num);
         free($1);
         free($2);
         free($4);
@@ -256,45 +283,40 @@ statement
  * Result: ELSE always binds to nearest IF, which is correct C semantics.
  */
 
+if_prefix
+    : IF '(' expression ')'
+    {
+        /* Emit condition check once; branch target is either else label or end label */
+        int else_or_end_label = create_label(code_gen);
+        emit_tac_if_false(code_gen, $3, else_or_end_label, line_num);
+        push_if_labels(else_or_end_label, -1);
+        free($3);
+    }
+    ;
+
 if_statement
-    : IF '(' expression ')' 
+    : if_prefix statement %prec LOWER_THAN_ELSE
     {
-        /* After condition: emit IF_FALSE to skip then-body if condition is false */
+        /* if (...) then_stmt;  -> place end label */
+        int else_or_end_label, dummy;
+        pop_if_labels(&else_or_end_label, &dummy);
+        emit_tac_label(code_gen, else_or_end_label, line_num);
+    }
+    | if_prefix statement ELSE
+    {
+        /* if (...) then_stmt else ... -> jump over else, then place else label */
+        int else_label, unused_end;
         int end_label = create_label(code_gen);
-        emit_tac_if_false(code_gen, $3, end_label, line_num);
-        push_loop_labels(end_label, -1);
-        free($3);
-    }
-    statement %prec LOWER_THAN_ELSE
-    {
-        /* After then-body: emit label for else-to-jump-to */
-        int end_label, dummy;
-        pop_loop_labels(&end_label, &dummy);
-        emit_tac_label(code_gen, end_label, line_num);
-    }
-    | IF '(' expression ')' 
-    {
-        /* If-else: after condition, emit IF_FALSE */
-        int else_label = create_label(code_gen);
-        int end_label = create_label(code_gen);
-        emit_tac_if_false(code_gen, $3, else_label, line_num);
-        push_loop_labels(else_label, end_label);
-        free($3);
-    }
-    statement ELSE
-    {
-        /* After then-body, before else: emit GOTO end and LABEL else */
-        int else_label, end_label;
-        pop_loop_labels(&else_label, &end_label);
+        pop_if_labels(&else_label, &unused_end);
         emit_tac_goto(code_gen, end_label, line_num);
         emit_tac_label(code_gen, else_label, line_num);
-        push_loop_labels(else_label, end_label);
+        push_if_labels(else_label, end_label);
     }
     statement
     {
-        /* After else-body: emit label for end */
-        int else_label, end_label;
-        pop_loop_labels(&else_label, &end_label);
+        /* End of else branch */
+        int unused_else, end_label;
+        pop_if_labels(&unused_else, &end_label);
         emit_tac_label(code_gen, end_label, line_num);
     }
     ;
@@ -464,9 +486,12 @@ expression
         $$ = $2;
     }
     | IDENTIFIER '=' expression {
-        if (!lookup_symbol(sym_table, $1)) {
+        Symbol *sym = lookup_symbol(sym_table, $1);
+        if (!sym) {
             fprintf(stderr, "SEMANTIC ERROR at line %d: Undeclared variable '%s'\n", line_num, $1);
             semantic_error_count++;
+        } else {
+            sym->initialized = 1;
         }
         emit_tac_binary(code_gen, TAC_ASSIGN, $1, $3, NULL, line_num);
         $$ = strdup($1);

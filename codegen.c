@@ -188,7 +188,18 @@ void emit_tac_binary(CodeGenerator *cg, TACOpcode op, const char *result,
 /* Emit unary operation */
 void emit_tac_unary(CodeGenerator *cg, TACOpcode op, const char *result,
                     const char *operand, int line) {
-    emit_tac(cg, op, result, operand, NULL, 0, 0, line);
+    if (cg == NULL) return;
+
+    int operand_is_const = is_numeric_constant(operand);
+    int64_t operand_val = 0;
+    if (operand_is_const && operand) {
+        operand_val = atoll(operand);
+    }
+
+    emit_tac(cg, op, result, operand, NULL, operand_is_const, 0, line);
+    if (operand_is_const && cg->code_size > 0) {
+        cg->code[cg->code_size - 1].const_val1 = operand_val;
+    }
 }
 
 /* Emit label */

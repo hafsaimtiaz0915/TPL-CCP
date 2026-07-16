@@ -1,13 +1,10 @@
-/* Test Case 1.4: If-Else Control Structure */
 int main() {
-    int x;
-    x = 5;
-    
-    if (x > 0) {
-        x = 10;
-    } else {
-        x = -10;
-    }
-    
-    return 0;
+    int x = 10;
+    int y = 5;
+    if (x > 0)
+        if (y > 10)
+            x = 1;
+        else
+            x = 2;
+    return x;
 }

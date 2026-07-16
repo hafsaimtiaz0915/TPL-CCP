@@ -1,0 +1,33 @@
+Token Analysis Output
+=====================
+
+Token Type      Token Value                         Line      
+────────────────────────────────────────────────────────────────
+KEYWORD         int                                 1         
+IDENTIFIER      main                                1         
+PUNCTUATION     (                                   1         
+PUNCTUATION     )                                   1         
+PUNCTUATION     {                                   1         
+KEYWORD         int                                 2         
+IDENTIFIER      x                                   2         
+OPERATOR        =                                   2         
+NUMBER          5                                   2         
+PUNCTUATION     ;                                   2         
+KEYWORD         int                                 3         
+IDENTIFIER      y                                   3         
+OPERATOR        =                                   3         
+NUMBER          3                                   3         
+PUNCTUATION     ;                                   3         
+KEYWORD         int                                 4         
+IDENTIFIER      z                                   4         
+OPERATOR        =                                   4         
+IDENTIFIER      x                                   4         
+OPERATOR        +                                   4         
+IDENTIFIER      y                                   4         
+PUNCTUATION     ;                                   4         
+KEYWORD         return                              5         
+IDENTIFIER      z                                   5         
+PUNCTUATION     ;                                   5         
+PUNCTUATION     }                                   6         
+
+Total Tokens: 26
